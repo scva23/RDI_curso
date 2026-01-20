@@ -2,32 +2,61 @@
 using System;
 using System.Collections.Generic;
 
+
+using System;
+using System.Collections.Generic;
+using System.Linq; // ← importante para GroupBy/Select
+
 namespace Projeto_Biblioteca
 {
     public class Biblioteca
     {
-        public List<Livro> Livros { get; set; } = new List<Livro>();
-        public List<Pessoa> Pessoas { get; set; } = new List<Pessoa>();
+        public List<Livro> Livros { get; } = new List<Livro>();
+        public List<Pessoa> Pessoas { get; } = new List<Pessoa>();
 
-        // Cadastrar livros
         public void CadastrarLivro(Livro livro)
         {
             Livros.Add(livro);
         }
 
-        // Cadastrar usuários
         public void CadastrarUsuario(Pessoa pessoa)
         {
             Pessoas.Add(pessoa);
         }
 
-        // Listar livros
         public void ListarLivros()
         {
+            if (Livros.Count == 0)
+            {
+                Console.WriteLine("Não há livros cadastrados.");
+                return;
+            }
+
+            Console.WriteLine("------ Livros ------");
             foreach (var livro in Livros)
             {
-                Console.WriteLine($"ID: {livro.Id} - Título: {livro.Titulo} - Status: {livro.Status}");
+                Console.WriteLine($"ID: {livro.Id} - Título: {livro.Titulo} - Status: {livro.Status}" +
+                                  (livro.Status == "Emprestado" ? $" (com {livro.Locatario})" : ""));
             }
         }
+
+        public void RemoverDuplicadosPorId()
+        {
+            // Mantém o primeiro de cada ID
+            var unicos = Livros
+                .GroupBy(l => l.Id)
+                .Select(g => g.First())
+                .ToList();
+
+            int removidos = Livros.Count - unicos.Count;
+            Livros.Clear();
+            Livros.AddRange(unicos);
+
+            Console.WriteLine(removidos > 0
+                ? $"🧹 Removidos {removidos} duplicados por ID."
+                : "Nenhum duplicado por ID encontrado.");
+        }
+        
     }
 }
+
